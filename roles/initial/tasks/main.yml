@@ -1,0 +1,113 @@
+---
+- name: Create Ansible User
+  remote_user: root
+  user:
+    name: ansible
+    state: present
+  
+- name: Add Ansible User SSH Public Key
+  remote_user: root
+  authorized_key:
+    user: ansible
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+g68qreSoiG66ItvI9ggwC7yZdgUZcPnHAjbHtGyTgLaQTZZx7SYewMhGN3uhYAOXSnAKpaZh1Z+HNkcbuJJfpGGJm/Yp18JYAHyAKG/kuKFxeEmmB0ECfdwg16cDZlBCjSq85afGqQT0J0WwnFgPs3or9zGkWOqAsHI4PaKsXxGhB3xnwRvitli0dYiFvox/3tpwJwfx5WR/82IYvX9ATu5YFMYZ1MO1HUyAtMngRx1kRHujOGCQJ3cr/qgf0dGKTsIl+G6k1+MbnPlcqUFBnXLl3i8hvnYAO+e0f1xGd4odG85CKBL7F7ltKDl8oKAuuEI6QkHLFQxAiF1vbJkz dany0@do-nyc1.310networks.com
+    state: present
+  
+- name: Create dryan User
+  remote_user: root
+  user:
+    name: dryan
+    state: present
+
+- name: Add dryan User SSH Public Key
+  remote_user: root
+  authorized_key:
+    user: dryan
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDG8RCJ6bYip8Vq7M/ym+OO2CiQhwu0JnEti0qsQQpSvzWJeJ8B6HF9ShgBkPdUvHa2Itl80HtuPxEJzNqgQoYHgVuxzuEivNZSGtJ2kNDLYpf41HNh89rRpA/iVkNkWgn1PJkhETDfy7VPPe9VsePO8kzGCErdny93rdk6qG0SeuKDwQcGeOhrqpVASEiSoaN+jDfclKb23ycVcm38614fXq1lsoumL1da4yaD9co8bFfbZtVb9liZJFRmxj3VW8gIHAgBk4EgaNqHDh3NgEZte2YOO2FfPR7PTd+GdnBWChuoF4TaSAD0wOnaskDFCIWz69pf6K4TcjewgUpgtywJZuZfOLgm5ZSy22KX4c/Z9GnKrX13ZRhjYojuVtXNkwVCYFBh29s3ftBLN5Z1p5rBOQMSIvFRNRqUsjmFKFCT68ssAnzn69266WaMWobYZycjTzQ++tJhdl43dTpJvMYd7c3ARVkC56VHB68I0zAo8V0BoV5Oh+ZW9VZtLhcATniN19IwN9s45jaW3YSZ0Vye8ihfkNaSeeV7g2XWe/sPWDAbBMbxLWG0gvD9p9qzGJAcAszaeqQLt9k/FEWHR9Ma1E+85xziUstqJjOwP/tJWLQy0+EEELZQ8FWWbYnGhAo38UyG3yj1iJIcg6zJAxBz3KzpQGz5Zk8MjNmgDRcqCw== stackpath@ubuntu
+    state: present
+
+- name: Ensure ansible user is in /usr/local/etc/sudoers with no pass required
+  remote_user: root
+  when: ansible_distribution == "FreeBSD"
+  lineinfile:
+    dest: /usr/local/etc/sudoers
+    state: present
+    regexp: '^ansible ALL\='
+    line: 'ansible ALL=(ALL) NOPASSWD:ALL'
+
+- name: Ensure ansible user is in /etc/sudoers with no pass required
+  remote_user: root
+  when: ansible_distribution == "CentOS"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^ansible ALL\='
+    line: 'ansible ALL=(ALL) NOPASSWD:ALL'
+
+- name: Ensure dryan user is in /usr/local/etc/sudoers with no pass required (FreeBSD)
+  remote_user: root
+  when: ansible_distribution == "FreeBSD"
+  lineinfile:
+    dest: /usr/local/etc/sudoers
+    state: present
+    regexp: '^dryan ALL\='
+    line: 'dryan ALL=(ALL) NOPASSWD:ALL'
+
+- name: Ensure dryan user is in /etc/sudoers with no pass required (CentOS)
+  remote_user: root
+  when: ansible_distribution == "CentOS"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^dryan ALL\='
+    line: 'dryan ALL=(ALL) NOPASSWD:ALL'
+
+- name: Disable Root Login
+  remote_user: root
+  lineinfile:  
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+  register: ssh_config
+
+- name: Remove without password
+  remote_user: root
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: absent
+    regexp: '^PermitRootLogin without-password'
+  register: ssh_config
+
+- name: Disable Password Authentication
+  remote_user: root
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    insertafter: EOF
+  register: ssh_config
+
+- name: Copy over 310 Networks SSH Welcome Banner
+  remote_user: root
+  copy:
+    src: /etc/ansible/files/misc/sshd-banner
+    dest: /etc/ssh/sshd-banner
+    owner: root
+    group: wheel
+
+- name: Use 310 Networks SSH Banner
+  remote_user: root
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: '^Banner'
+    line: 'Banner /etc/ssh/sshd-banner'
+    insertafter: EOF
+  register: ssh_config
+
+- name: Restart SSH
+  remote_user: root
+  service:
+    name: sshd
+    state: restarted

@@ -1,0 +1,14 @@
+---
+- name: Never install unnecessary options: X11, CUPS, sound, etc.
+- lineinfile:
+    path: /etc/make.conf
+    state: present
+    line: 'WITHOUT_X11= YES'
+- lineinfile:
+    path: /etc/make.conf
+    state: present
+    line: 'OPTIONS_UNSET=CUPS DEBUG DECOS FONTCONFIG NLS X11'
+- lineinfile:
+    path: /etc/make.conf
+    state: present
+    line: 'WITHOUT_MODULES=sound ntfs linux'

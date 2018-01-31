@@ -1,0 +1,14 @@
+---
+# Network Variables
+ansible_host: 67.205.142.163
+private_ip: 10.136.15.241
+hostname: do-jfk1.310networks.com
+dns1: 9.9.9.9
+dns2: 8.8.8.8
+
+# DN42 Variables
+dn42_network: 172.20.15.160/27
+dn42_ip: 172.20.15.169
+dn42_asn: 4242423310
+dn42_netmask: 255.255.255.224
+dn42_ifname: eth0:0

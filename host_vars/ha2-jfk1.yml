@@ -1,0 +1,16 @@
+---
+# Network Variables
+ansible_host: 192.241.153.103
+private_ip: 10.136.45.44
+hostname: ha2-jfk1.310networks.com
+dns1: 9.9.9.9
+dns2: 8.8.8.8
+
+#node-cryptonote-pool Variables
+
+# DN42 Variables
+dn42_network: 172.20.15.160/27
+dn42_ip: 172.20.15.169
+dn42_asn: 4242423310
+dn42_netmask: 255.255.255.224
+dn42_ifname: eth0:0

@@ -1,0 +1,34 @@
+---
+- name: Create Necessary Users
+  become: true
+  user:
+    createhome: yes
+    group: '{{ user1_group }}'
+    name: '{{ user1_name }}'
+    password: '{{ user1_pass }}'
+    state: present
+    system: yes
+    update_password: on_create
+
+- name: Add Public key
+  become: true
+  authorized_key:
+    user: '{{ user1_name }}'
+    key: '{{ user1_pub_key }}'
+
+- name: Ensure user is in /usr/local/etc/sudoers with no pass required
+  remote_user: root
+  lineinfile:
+    dest: /usr/local/etc/sudoers
+    state: present
+    regexp: '^dryan ALL\='
+    line: 'dryan ALL=(ALL) NOPASSWD:ALL'
+
+- name: Update User .vimrc
+  become: true
+  become_user: '{{ user1_name }}'
+  copy:
+    src: /etc/ansible/files/misc/vimrc
+    dest: ~/.vimrc
+    owner: '{{ user1_name }}'
+    

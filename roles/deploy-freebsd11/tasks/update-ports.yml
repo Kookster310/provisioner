@@ -1,0 +1,5 @@
+---
+- name: "Update ports-mgmt and portmaster"
+  shell: pkg install ports-mgmt/portmaster && portsnap auto && portmaster -a
+
+
