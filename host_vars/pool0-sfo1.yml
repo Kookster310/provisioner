@@ -1,6 +1,6 @@
 ---
 # Network Variables
-ansible_host: 159.89.147.243
+ansible_host: 159.89.155.129
 private_ip: 10.136.45.44
 
 #node-cryptonote-pool Host Variables
